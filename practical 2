@@ -1,0 +1,50 @@
+package pass;
+
+class Symbol {
+    int addr;
+    Symbol(int a) { addr = a; }
+}
+
+class Literal {
+    int addr;
+    Literal(int a) { addr = a; }
+}
+
+public class Pass2Simple {
+    public static void main(String[] args) {
+        String ic[][] = {
+            {"(AD,01)", null, "(C,100)"},
+            {"(IS,04)", "(RG,01)", "(L,0)"},
+            {"(IS,01)", "(RG,03)", "(S,0)"},
+            {"(DL,01)", null, "(C,3)"},
+            {"(IS,04)", "(RG,01)", "(S,2)"}
+        };
+
+        Symbol sym[] = { new Symbol(102), new Symbol(105), new Symbol(112) };
+        Literal lit[] = { new Literal(108), new Literal(109) };
+
+        System.out.println("--- Machine Code ---");
+        for (String[] line : ic) {
+            if (line[0] == null) continue;
+            String code = line[0];
+
+            if (code.contains("IS")) {
+                String op = code.replaceAll("[^0-9]", "");
+                String r = (line[1] == null) ? "00" : line[1].replaceAll("[^0-9]", "");
+                String mem = "000";
+
+                if (line[2] != null) {
+                    char type = line[2].charAt(1);
+                    int idx = Integer.parseInt(line[2].replaceAll("[^0-9]", ""));
+                    mem = (type == 'S') ? String.valueOf(sym[idx].addr) : String.valueOf(lit[idx].addr);
+                }
+                System.out.println(op + "\t" + r + "\t" + mem);
+            }
+
+            else if (code.contains("DL")) {
+                String c = line[2].replaceAll("[^0-9]", "");
+                System.out.println("00\t00\t" + c);
+            }
+        }
+    }
+}
