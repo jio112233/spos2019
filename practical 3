@@ -1,0 +1,107 @@
+package Scheduling;
+import java.util.*;
+
+public class SchedulingSimple {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            System.out.println("\n1.FCFS  2.SJF  3.Priority  4.Round Robin  5.Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+            if (ch == 5) break;
+
+            System.out.print("Enter number of processes: ");
+            int n = sc.nextInt();
+            int[] bt = new int[n], at = new int[n], pr = new int[n];
+            for (int i = 0; i < n; i++) {
+                System.out.print("Burst Time P" + (i + 1) + ": ");
+                bt[i] = sc.nextInt();
+                if (ch == 2) { System.out.print("Arrival: "); at[i] = sc.nextInt(); }
+                if (ch == 3) { System.out.print("Priority: "); pr[i] = sc.nextInt(); }
+            }
+
+            switch (ch) {
+                case 1 -> fcfs(bt);
+                case 2 -> sjf(bt, at);
+                case 3 -> priority(bt, pr);
+                case 4 -> rr(bt, sc);
+            }
+        }
+        sc.close();
+    }
+
+    static void fcfs(int[] bt) {
+        int n = bt.length, wt = 0, tat = 0, totalW = 0, totalT = 0;
+        System.out.println("\nFCFS Scheduling");
+        for (int i = 0; i < n; i++) {
+            tat += bt[i];
+            System.out.println("P" + (i + 1) + " WT:" + wt + " TAT:" + tat);
+            totalW += wt; totalT += tat; wt += bt[i];
+        }
+        avg(totalW, totalT, n);
+    }
+
+    static void sjf(int[] bt, int[] at) {
+        int n = bt.length, t = 0, completed = 0;
+        int[] rt = bt.clone(), wt = new int[n], tat = new int[n];
+        System.out.println("\nSJF (Preemptive)");
+        while (completed < n) {
+            int idx = -1, min = 999;
+            for (int i = 0; i < n; i++)
+                if (at[i] <= t && rt[i] > 0 && rt[i] < min) { min = rt[i]; idx = i; }
+            if (idx == -1) { t++; continue; }
+            rt[idx]--; t++;
+            if (rt[idx] == 0) { completed++; tat[idx] = t - at[idx]; wt[idx] = tat[idx] - bt[idx]; }
+        }
+        print(wt, tat, n);
+    }
+
+    static void priority(int[] bt, int[] pr) {
+        int n = bt.length;
+        Integer[] idx = new Integer[n];
+        for (int i = 0; i < n; i++) idx[i] = i;
+        Arrays.sort(idx, Comparator.comparingInt(i -> pr[i]));
+        int wt = 0, tat = 0, totalW = 0, totalT = 0;
+        System.out.println("\nPriority Scheduling");
+        for (int i : idx) {
+            tat += bt[i];
+            System.out.println("P" + (i + 1) + " WT:" + wt + " TAT:" + tat);
+            totalW += wt; totalT += tat; wt += bt[i];
+        }
+        avg(totalW, totalT, n);
+    }
+
+    static void rr(int[] bt, Scanner sc) {
+        System.out.print("Enter Time Quantum: ");
+        int q = sc.nextInt(), n = bt.length;
+        int[] rt = bt.clone(), wt = new int[n], tat = new int[n];
+        int t = 0;
+        System.out.println("\nRound Robin");
+        while (true) {
+            boolean done = true;
+            for (int i = 0; i < n; i++) {
+                if (rt[i] > 0) {
+                    done = false;
+                    if (rt[i] > q) { t += q; rt[i] -= q; }
+                    else { t += rt[i]; wt[i] = t - bt[i]; rt[i] = 0; }
+                }
+            }
+            if (done) break;
+        }
+        for (int i = 0; i < n; i++) tat[i] = bt[i] + wt[i];
+        print(wt, tat, n);
+    }
+
+    static void print(int[] wt, int[] tat, int n) {
+        double tw = 0, tt = 0;
+        for (int i = 0; i < n; i++) {
+            System.out.println("P" + (i + 1) + " WT:" + wt[i] + " TAT:" + tat[i]);
+            tw += wt[i]; tt += tat[i];
+        }
+        avg(tw, tt, n);
+    }
+
+    static void avg(double w, double t, int n) {
+        System.out.printf("Avg WT=%.2f  Avg TAT=%.2f\n", w / n, t / n);
+    }
+}
