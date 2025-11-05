@@ -1,0 +1,87 @@
+package spos;
+
+import java.util.*;
+
+public class PageReplacementSimple {
+
+    // LRU Page Replacement
+    static void lru(int[] pages, int capacity) {
+        List<Integer> frames = new ArrayList<>();
+        int pageFaults = 0;
+
+        System.out.println("\n--- LRU Page Replacement ---");
+        for (int page : pages) {
+            if (!frames.contains(page)) {
+                if (frames.size() == capacity)
+                    frames.remove(0); // remove least recently used
+                frames.add(page);
+                pageFaults++;
+            } else {
+                // Move recently used page to the end
+                frames.remove((Integer) page);
+                frames.add(page);
+            }
+            System.out.println(frames);
+        }
+        System.out.println("Total Page Faults (LRU): " + pageFaults);
+    }
+
+    // Optimal Page Replacement
+    static void optimal(int[] pages, int capacity) {
+        List<Integer> frames = new ArrayList<>();
+        int pageFaults = 0;
+
+        System.out.println("\n--- Optimal Page Replacement ---");
+        for (int i = 0; i < pages.length; i++) {
+            int page = pages[i];
+
+            if (!frames.contains(page)) {
+                if (frames.size() < capacity) {
+                    frames.add(page);
+                } else {
+                    int farthest = -1, indexToReplace = -1;
+
+                    // Find the page not used for longest time
+                    for (int j = 0; j < frames.size(); j++) {
+                        int nextUse = Integer.MAX_VALUE;
+                        for (int k = i + 1; k < pages.length; k++) {
+                            if (frames.get(j) == pages[k]) {
+                                nextUse = k;
+                                break;
+                            }
+                        }
+                        if (nextUse > farthest) {
+                            farthest = nextUse;
+                            indexToReplace = j;
+                        }
+                    }
+                    frames.set(indexToReplace, page);
+                }
+                pageFaults++;
+            }
+            System.out.println(frames);
+        }
+        System.out.println("Total Page Faults (Optimal): " + pageFaults);
+    }
+
+    // Main Method
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of pages: ");
+        int n = sc.nextInt();
+
+        int[] pages = new int[n];
+        System.out.print("Enter page reference string: ");
+        for (int i = 0; i < n; i++)
+            pages[i] = sc.nextInt();
+
+        System.out.print("Enter frame capacity: ");
+        int capacity = sc.nextInt();
+
+        lru(pages, capacity);
+        optimal(pages, capacity);
+
+        sc.close();
+    }
+}
