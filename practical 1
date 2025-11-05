@@ -1,0 +1,65 @@
+package Assembler;
+
+import java.io.*;
+
+public class SimpleAssemblerShort {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(args[0]));
+        String line;
+        int LC = 0;
+
+        String[][] symTab = new String[20][2];
+        String[][] litTab = new String[20][2];
+        String[][] opTab = new String[20][2];
+
+        int s = 0, l = 0, o = 0;
+
+        while ((line = br.readLine()) != null) {
+            String[] t = line.trim().split("\\s+");
+            if (t.length == 0) continue;
+
+            if (t.length > 1 && t[1].equalsIgnoreCase("START")) {
+                LC = Integer.parseInt(t[2]);
+                continue;
+            }
+
+            if (!t[0].equals("")) {
+                symTab[s][0] = t[0];
+                symTab[s][1] = String.valueOf(LC);
+                s++;
+            }
+
+            if (t.length > 1 && (t[1].equalsIgnoreCase("DS") || t[1].equalsIgnoreCase("DC"))) {
+                opTab[o][0] = t[1];
+                opTab[o][1] = "DL";
+                o++;
+            } else if (t.length > 1) {
+                opTab[o][0] = t[1];
+                opTab[o][1] = "IS";
+                o++;
+            }
+
+            if (t.length >= 3 && t[2].startsWith("=")) {
+                litTab[l][0] = t[2];
+                litTab[l][1] = String.valueOf(LC);
+                l++;
+            }
+
+            LC++;
+        }
+
+        System.out.println("\nSYMBOL TABLE");
+        for (int i = 0; i < s; i++)
+            System.out.println(symTab[i][0] + "\t" + symTab[i][1]);
+
+        System.out.println("\nOPCODE TABLE");
+        for (int i = 0; i < o; i++)
+            System.out.println(opTab[i][0] + "\t" + opTab[i][1]);
+
+        System.out.println("\nLITERAL TABLE");
+        for (int i = 0; i < l; i++)
+            System.out.println(litTab[i][0] + "\t" + litTab[i][1]);
+
+        br.close();
+    }
+}
